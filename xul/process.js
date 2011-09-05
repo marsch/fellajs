@@ -1,0 +1,31 @@
+define('notifier/ext/fella/xul/process', [], function () {
+
+  var process = function() {
+    var that = {};
+    var CC = Components.classes,
+        CI = Components.interfaces;
+
+    that.execute = function (executable, args, callback) {
+      var file = CC['@mozilla.org/file/local;1'].createInstance(CI.nsILocalFile);
+      file.initWithPath(executable);
+
+      var proc = CC['@mozilla.org/process/util;1'].createInstance(CI.nsIProcess);
+      proc.init(file);
+      
+      proc.runwAsync(args, args.length, {
+        observe: function (proc, aTopic, aData) {
+          console.log('OBSERVE?? - NOTIFICATION');
+          console.log(aTopic);
+
+          console.log("isrunning:"+proc.isRunning);
+          console.log("exitValue:"+proc.exitValue);
+
+          callback();
+        }
+      });
+    };
+
+    return that;
+  };
+  return process;
+});
