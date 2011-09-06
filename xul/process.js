@@ -13,16 +13,19 @@ define('notifier/ext/fella/xul/process', [], function () {
       proc.init(file);
       
       proc.runwAsync(args, args.length, {
+
+        // when the process exits
         observe: function (proc, aTopic, aData) {
           console.log('OBSERVE?? - NOTIFICATION');
           console.log(aTopic);
 
           console.log("isrunning:"+proc.isRunning);
           console.log("exitValue:"+proc.exitValue);
-
-          callback();
         }
       });
+      callback(null, {});
+
+
     };
 
     return that;

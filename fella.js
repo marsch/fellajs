@@ -2,9 +2,11 @@ define('notifier/ext/fella/fella', [
   'notifier/ext/fella/events',
   'notifier/ext/fella/async',
   'notifier/ext/fella/http',
-  'notifier/ext/fella/process'
+  'notifier/ext/fella/process',
+  'notifier/ext/fella/storage',
+  'notifier/ext/fella/files'
 
-], function (events, async, http, process) {
+], function (events, async, http, process, storage, files) {
 
   var fellajs = {
 
@@ -14,8 +16,9 @@ define('notifier/ext/fella/fella', [
   fellajs.async = async();
   fellajs.http = http();
   fellajs.process = process();
+  fellajs.storage = storage();
+  fellajs.files = files();
 
-  console.log("process:"+fellajs.process);
 
   return fellajs;
 });

@@ -10,6 +10,8 @@ define('notifier/ext/fella/couchdbservice', ['notifier/common/class'], function 
       erllibspath = path + 'ext/couchdb/couchdb_trunk/lib/couchdb/erlang/lib',
       defaultini = path + 'ext/couchdb/couchdb_trunk/etc/couchdb/default.ini',
       localini = path + 'ext/couchdb/couchdb_trunk/etc/couchdb/local.ini',
+
+      couchdbURI = path + 'ext/couchdb/couchdb_trunk/var/run/couchdb/couch.uri',
       fella = window.fella;
       
     var couchdbArgs = [
@@ -36,26 +38,70 @@ define('notifier/ext/fella/couchdbservice', ['notifier/common/class'], function 
        
     };
 
-    that.start = function () {
-      console.log("fella?"+fella.events);
-      console.log(window.fella);
-      fella.process.execute( erlbinpath, couchdbArgs, function () {
-        console.log("COUCHDB START CALLBAKC");
-      
+    that.start = function (callback) {
+      //check timestamp of couch.uri file
+      fella.files.getInfo( couchdbURI, function (err, data) {
+        var lastModifiedURI = data.lastModified;
+        fella.process.execute( erlbinpath, couchdbArgs, function () {
+          console.log('COUCHDB START CALLBAKC');
+          //now find out if its running.....
+          that.waitForStartup( lastModifiedURI, function (err, data) {
+            console.log('COUCH IS UP AND RUNNING');
+            callback(null,data);
+          });
+          
+        });
+
+        console.log('FILE INFO');
+        console.log(data.lastModified);
       });
-/*
-      that.getLogger().trace('start');
-      console.log(erlbinpath + " " + couchdbArgs.join(" "));
-      process.runwAsync(couchdbArgs, couchdbArgs.length, {
-        observe: function(proc, aTopic, aData) {
-          console.log('OBSERVE?? - NOTIFICATION');
-          console.log(aTopic);
+      //start the process
+    };
 
-          console.log("isrunning:"+proc.isRunning);
-          console.log("exitValue:"+proc.exitValue);
-
+    that.waitForStartup = function (oldTimeStamp, callback) {
+      console.log('waiting... for my couch...');
+      fella.files.getInfo( couchdbURI, function (err, data) {
+        var newLastModifiedURI = data.lastModified;
+        //check the timestamp of couch.uri file
+        if (oldTimeStamp < newLastModifiedURI) {
+          console.log('old:'+oldTimeStamp);
+          console.log('new:'+newLastModifiedURI);
+          //if changed, read the contents and trigger the callback with the data
+          fella.files.readFile( couchdbURI, function (err, couchURI) {
+            that.ping(couchURI, function (err, isUp) {
+              if(err) {
+                return callback(err, null);
+              }
+              callback(null, couchURI);
+            });
+          });
+        } else {
+          setTimeout(function () {
+            that.waitForStartup(oldTimeStamp, callback);
+          }, 100);
         }
-      });*/
+        
+      });
+    };
+
+    that.ping = function (uri, callback) {
+      $.ajax({
+        type: 'GET',
+        url: uri,
+        error: function (xhr, textStatus, errorThrown) {
+          callback(textStatus, null);
+        },
+        complete: function(req) {
+          var resp = $.parseJSON(req.responseText);
+          console.log(req.responseText);
+          if(resp.couchdb === 'Welcome') { //hehe
+            callback(null, true);
+          } else {
+            callback('not welcome', false);
+          }
+        }
+      });
+
     };
 
     that.stop = function () {

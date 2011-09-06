@@ -17,6 +17,10 @@ define('notifier/ext/fella/xul/http', [], function () {
     *   path
     *   headers
     *   agent
+    *
+    *   SHOULD BE REMOVED or REPLACED with a Jquery.ajax compatible implementation
+    *   I THINK for normal requests $.ajax is okay - execpt fileuploads etc. or streams
+    *
     */ 
     that.request = function (options, callback) {
       var ioservice,
