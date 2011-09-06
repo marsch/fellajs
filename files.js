@@ -15,6 +15,10 @@ define('notifier/ext/fella/files', [
       xpcom.files.readFile(path, callback);
     };
 
+    that.getUserHome = function () {
+      return xpcom.files.getUserHome();
+    }
+
     return that;
   };
 

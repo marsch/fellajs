@@ -43,6 +43,13 @@ define('notifier/ext/fella/xul/files', [], function() {
       cstream.close();
       callback(null, data);
     };
+
+    that.getUserHome = function () {
+      var dirService = CC['@mozilla.org/file/directory_service;1'].getService(CI.nsIProperties);
+      var homeDirFile = dirService.get("Home", CI.nsIFile);
+      return homeDirFile.path;
+    };
+
     return that;
   };
   return files;
