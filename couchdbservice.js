@@ -13,6 +13,9 @@ define('notifier/ext/fella/couchdbservice', ['notifier/common/class'], function 
 
       couchdbURI = path + 'ext/couchdb/couchdb_trunk/var/run/couchdb/couch.uri',
       fella = window.fella;
+
+    localini = fella.files.getUserHome() + '/notifier/couchdb/etc/couchdb/local.ini';
+    couchdbURI = fella.files.getUserHome() + '/notifier/couchdb/var/run/couchdb/couch.uri';
       
     var couchdbArgs = [
                         '+Bd',
@@ -35,7 +38,31 @@ define('notifier/ext/fella/couchdbservice', ['notifier/common/class'], function 
                       ];
 
     that.init = function (options) {
-       
+      /*var userHome = fella.files.getUserHome();
+
+      //directories to create if not exist
+      var appDirectory = userHome + '/notifier';
+      var couchdbDirectory = appDirectory + '/couchdb';
+
+      var couchdbLogDirectory = couchdbDirectory + '/log';
+      var couchdbRunDirectory = couchdbDirectory + '/run';
+      var couchdbDatabaseDirectory = couchdbDirectory + '/databases';
+      var couchdbConfigDirectory = couchdbDirectory + '/etc';
+
+      if(!fella.files.exists(appDirectory)) {
+        //create initial structure
+        //var, etc
+
+        console.log('create couchdb directory');
+        fella.files.createDirectory(couchdbHomeDirectory, '0600');
+      
+      } 
+      console.log("couchfiles should be located at: " + couchdbHomeDirectory);
+      console.log("isdir?" + fella.files.isDirectory(couchdbHomeDirectory));*/
+    };
+
+    that.install = function (path, callback) {
+    
     };
 
     that.start = function (callback) {
@@ -60,12 +87,12 @@ define('notifier/ext/fella/couchdbservice', ['notifier/common/class'], function 
 
     that.waitForStartup = function (oldTimeStamp, callback) {
       console.log('waiting... for my couch...');
+      console.log('old:'+oldTimeStamp);
       fella.files.getInfo( couchdbURI, function (err, data) {
         var newLastModifiedURI = data.lastModified;
         //check the timestamp of couch.uri file
+        console.log('new:'+newLastModifiedURI);
         if (oldTimeStamp < newLastModifiedURI) {
-          console.log('old:'+oldTimeStamp);
-          console.log('new:'+newLastModifiedURI);
           //if changed, read the contents and trigger the callback with the data
           fella.files.readFile( couchdbURI, function (err, couchURI) {
             that.ping(couchURI, function (err, isUp) {
@@ -101,13 +128,13 @@ define('notifier/ext/fella/couchdbservice', ['notifier/common/class'], function 
           }
         }
       });
-
     };
 
     that.stop = function () {
     
     };
 
+    
     return that;
   };
 
